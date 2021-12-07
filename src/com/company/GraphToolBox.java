@@ -27,14 +27,26 @@ public class GraphToolBox {
             cover.add(p);
         }
 
-        Vector<Integer> snapshot_cover;
+        // save a snapshot of the last vertex cover each loop
+        Vector<Integer> snapshot_cover = new Vector<>();
         while (VertexCoverChecker(inputGraph, cover)) {
             snapshot_cover = (Vector<Integer>) cover.clone();
             int remove_at = ThreadLocalRandom.current().nextInt(0, cover.size());
             cover.remove(remove_at);
         }
+        if (VertexCoverChecker(inputGraph, snapshot_cover)) {
+            return CreateReturnCover(snapshot_cover, inputGraph);
+        } else {
+            throw new RuntimeException("inexactVC returned a non valid vertex cover");
+        }
+    }
 
-        return null;
+    private static int[] CreateReturnCover(Vector<Integer> snapshot, Graph graph) {
+        int[] cover_to_return = new int[snapshot.size()];
+        for (int p = 0; p < snapshot.size(); p++) {
+            cover_to_return[p] = snapshot.get(p);
+        }
+        return cover_to_return;
     }
 
     // Strategy: go through each vertex in the graph. For each vertex, check if the current vertex or a "child" is in the
@@ -45,8 +57,6 @@ public class GraphToolBox {
     //      1) check if node is a vertex cover
     //      2) check if neighbor is in a vertex cover
     //      > else { isValidCover == false };
-    // TODO: debug vertex Checker with smaller graph and manuel inputs
-    // TODO: fix always returning true issue???
     public static boolean VertexCoverChecker(Graph inputGraph, Vector<Integer> cover) {
         for (int p = 0; p < inputGraph.getGraph().length; p++) {
             // check if parent vertex is part of the cover
