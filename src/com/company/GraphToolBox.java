@@ -48,6 +48,7 @@ public class GraphToolBox {
         }
     }
 
+    // Code used from https://www.geeksforgeeks.org/print-subsets-given-size-set/ to calculate the permutations
     private static void CombinationUtil(Vector<Integer> vertexes, int graph_size, int comb_size,
                             int index, int data[], int i, Vector<int[]> all_permutations) {
         if (index == comb_size) {
