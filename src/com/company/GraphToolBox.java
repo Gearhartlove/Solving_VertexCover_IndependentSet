@@ -19,23 +19,57 @@ public class GraphToolBox {
     // untill all nodes and their neighbors have been looked at.
     // Q:is this really the best strategy?
     public static int[] exactVC(Graph inputGraph) {
-        Vector <Integer> cover = new Vector<Integer>();
-        for (int p = 0; p < inputGraph.getGraph().length; p++) {
-            boolean isCovered = false;
-            // look at every child of the parent and check if they are in the cover. If covered, move on. Must look
-            // at every child before making a decision. And connection to each child, not or. Need to cover
-            // if already in cover, don't consider the children connections
-            if (!cover.contains(p)) {
-                for (int c = 0; c < inputGraph.getGraph()[p].length; c++) {
-                    if (!cover.contains(inputGraph.getGraph()[p][c])) {
-                        cover.add(inputGraph.getGraph()[p][c]);
-                    }
-                } if (VertexCoverChecker(inputGraph, cover)) {
+        // strategy : get each subset of the graph of size , while getting the subset, check if it is a valid vertex
+        // cover. If it is , return the vertex cover
+        Vector<Integer> graph_vertexes = new Vector<>(); //arr
+        for (int v = 0; v < inputGraph.getGraph().length; v++) {
+            graph_vertexes.add(v);
+        }
+
+        // start at permutations of size 1
+        int graph_size = graph_vertexes.size(); // n
+        int comb_size = 1; // r
+
+        while (true) {
+            int data[] = new int[comb_size];
+            Vector<int[]> all_permutations = new Vector<>();
+            CombinationUtil(graph_vertexes, graph_size, comb_size, 0, data, 0, all_permutations);
+            for (int[] perm : all_permutations) {
+                Vector<Integer> cover = new Vector<>();
+                for (int v : perm) {
+                    cover.add(v);
+                }
+                if (VertexCoverChecker(inputGraph, cover)) {
                     return CreateGraphSubset(cover, inputGraph);
                 }
             }
-         }
-        throw new RuntimeException("exactVC returned a non valid vertex cover / no exact cover found");
+            System.out.println(comb_size);
+            comb_size++;
+        }
+    }
+
+    private static void CombinationUtil(Vector<Integer> vertexes, int graph_size, int comb_size,
+                            int index, int data[], int i, Vector<int[]> all_permutations) {
+        if (index == comb_size) {
+           // Vector<Integer> all_permutations
+            for (int j = 0; j < comb_size; j++) {
+                //System.out.print(data[j] + " ");
+                var save_data = data.clone();
+                all_permutations.add(save_data);
+            }
+            // System.out.println("");
+            return;
+        }
+
+        // When no more elements are there to put in data[]
+        if (i >= graph_size) return;
+
+        // current is included, put next at next location
+        data[index] = vertexes.get(i);
+        CombinationUtil(vertexes, graph_size, comb_size, index+1, data, i + 1, all_permutations);
+
+        // current is excluded, replace it with next (Note that i+1 is passed, but index is not changed)
+        CombinationUtil(vertexes, graph_size, comb_size, index, data, i+1, all_permutations);
     }
 
     // return (in polynomial time) an array containing the vertex numbers of a VC.
