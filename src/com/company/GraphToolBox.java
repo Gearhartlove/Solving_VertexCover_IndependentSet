@@ -14,20 +14,40 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author finley
  */
 public class GraphToolBox {
-    // return an array containing the vertex numbers of an optimal VC.
+    // return an array containing the vertex numbers of an almost optimal VC.
+    //Strategy:look at each node in the graph, if it or a neighbor is not marked, mark it and repeat that process
+    // untill all nodes and their neighbors have been looked at.
+    // Q:is this really the best strategy?
     public static int[] exactVC(Graph inputGraph) {
-        return null;
+        Vector <Integer> cover = new Vector<Integer>();
+        for (int p = 0; p < inputGraph.getGraph().length; p++) {
+            boolean isCovered = false;
+            // look at every child of the parent and check if they are in the cover. If covered, move on. Must look
+            // at every child before making a decision. And connection to each child, not or. Need to cover
+            // if already in cover, don't consider the children connections
+            if (!cover.contains(p)) {
+                for (int c = 0; c < inputGraph.getGraph()[p].length; c++) {
+                    if (!cover.contains(inputGraph.getGraph()[p][c])) {
+                        cover.add(inputGraph.getGraph()[p][c]);
+                    }
+                } if (VertexCoverChecker(inputGraph, cover)) {
+                    return CreateGraphSubset(cover, inputGraph);
+                }
+            }
+         }
+        throw new RuntimeException("exactVC returned a non valid vertex cover / no exact cover found");
     }
 
     // return (in polynomial time) an array containing the vertex numbers of a VC.
     public static int[] inexactVC(Graph inputGraph) {
         Vector<Integer> cover = new Vector<Integer>();
-
+        // add everything to the cover to start
         for (int p = 0; p < inputGraph.getGraph().length; p++) {
             cover.add(p);
         }
-
         // save a snapshot of the last vertex cover each loop
+        // randomly remove one of the vertexes from the vertex cover until the cover is no longer valid.
+        // First loop will always be a valid vertex cover.
         Vector<Integer> snapshot_cover = new Vector<>();
         while (VertexCoverChecker(inputGraph, cover)) {
             snapshot_cover = (Vector<Integer>) cover.clone();
@@ -35,13 +55,14 @@ public class GraphToolBox {
             cover.remove(remove_at);
         }
         if (VertexCoverChecker(inputGraph, snapshot_cover)) {
-            return CreateReturnCover(snapshot_cover, inputGraph);
+            return CreateGraphSubset(snapshot_cover, inputGraph);
         } else {
             throw new RuntimeException("inexactVC returned a non valid vertex cover");
         }
     }
 
-    private static int[] CreateReturnCover(Vector<Integer> snapshot, Graph graph) {
+    // create int[] data structure filled with vertex numbers in the vertex cover
+    private static int[] CreateGraphSubset(Vector<Integer> snapshot, Graph graph) {
         int[] cover_to_return = new int[snapshot.size()];
         for (int p = 0; p < snapshot.size(); p++) {
             cover_to_return[p] = snapshot.get(p);
@@ -86,11 +107,65 @@ public class GraphToolBox {
 
     // return an array containing the vertex numbers of an optimal IS.
     public static int[] optimalIS(Graph inputGraph) {
-        return null;
+        // find the optimal vertex cover of the inputGraph and then return the compliment
+        var vertex_cover = exactVC(inputGraph);
+        var independent_set = new Vector<Integer>();
+
+        for (int v = 0; v < inputGraph.getGraph().length; v++) {
+            boolean inCover = false;
+            for (int vc = 0; vc < vertex_cover.length; vc++) {
+                if (v == vc) {
+                    inCover = true;
+                }
+            }
+            if (!inCover) {
+                independent_set.add(v);
+            }
+        }
+        if (ISChecker(inputGraph, independent_set, vertex_cover)) {
+            return CreateGraphSubset(independent_set, inputGraph);
+        }
+        else {
+            throw new RuntimeException("Failed to return valid optimal valid optimal independent set.");
+        }
     }
 
     // return (in polynomial time) an array containing the vertex numbers of a IS.
     public static int[] inexactIS(Graph inputGraph) {
-        return null;
+        // find the optimal vertex cover of the inputGraph and then return the compliment
+        var vertex_cover = inexactVC(inputGraph);
+        var independent_set = new Vector<Integer>();
+
+        for (int v = 0; v < inputGraph.getGraph().length; v++) {
+            boolean inCover = false;
+            for (int vc = 0; vc < vertex_cover.length; vc++) {
+                if (v == vc) {
+                    inCover = true;
+                }
+            }
+            if (!inCover) {
+                independent_set.add(v);
+            }
+        }
+        if (ISChecker(inputGraph, independent_set, vertex_cover)) {
+            return CreateGraphSubset(independent_set, inputGraph);
+        }
+        else {
+            throw new RuntimeException("Failed to return valid optimal valid optimal independent set.");
+        }
+    }
+
+    // Check if valid Independent Set (IS) by testing if the sum of both VC and IS is equal to the length of graph.
+    // Also check each value in the IS and if they are also in the VC return false
+    private static boolean ISChecker(Graph graph, Vector<Integer> IS, int[] cover) {
+        if (cover.length + IS.size() == graph.getGraph().length) {
+            for (int vc = 0; vc < cover.length; vc++) {
+                if (IS.contains(vc)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }

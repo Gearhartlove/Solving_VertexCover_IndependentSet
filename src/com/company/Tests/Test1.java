@@ -12,8 +12,9 @@ public class Test1 {
     @Test
     public void CorrectVertexCover() {
         // set up the correct graph
-        String filePath = "/Users/gearhart/Desktop/MiscPrograms/TheoryProj3/src/graphs/";
-        Graph graph = new Graph(filePath + "testgraph");
+        //String filePath = "/Users/gearhart/Desktop/MiscPrograms/TheoryProj3/src/graphs/";
+        String WindowfilePath =  "C:/Users/krist/IdeaProjects/Solving_VertexCover_IndependentSet/src/graphs/";
+        Graph graph = new Graph(WindowfilePath + "testgraph");
         Vector<Integer> cover;
         // Start Tests
         // all
@@ -39,8 +40,9 @@ public class Test1 {
     @Test
     public void IncorrectVertexCover() {
         // set up the correct graph
-        String filePath = "/Users/gearhart/Desktop/MiscPrograms/TheoryProj3/src/graphs/";
-        Graph graph = new Graph(filePath + "testgraph");
+        // String filePath = "/Users/gearhart/Desktop/MiscPrograms/TheoryProj3/src/graphs/";
+        String WindowfilePath =  "C:/Users/krist/IdeaProjects/Solving_VertexCover_IndependentSet/src/graphs/";
+        Graph graph = new Graph(WindowfilePath + "testgraph");
         Vector<Integer> cover;
         // Start Tests
         // no vertexes
